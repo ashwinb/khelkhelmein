@@ -1,0 +1,15 @@
+BINARIES = ["fast_glove", "annotated_transformer"]
+SOURCES = {}
+EXTRA_EXTERNAL_DEPS = {"annotated_transformer": [("seaborn")]}
+for binary in BINARIES:
+    python_binary(
+        name=binary,
+        srcs=["{}.py".format(binary)] + SOURCES.get(binary, []),
+        base_module="",
+        main_module=binary,
+        deps=["//caffe2:torch"],
+        external_deps=(
+            [("numpy"), ("python-tqdm"), ("scikit-learn")]
+            + EXTRA_EXTERNAL_DEPS.get(binary, [])
+        ),
+    )
