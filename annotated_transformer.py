@@ -59,6 +59,10 @@ class MultiHeadAttention(nn.Module):
         xpos_dims = (1, 2) if is_batch else (0, 1)
 
         q, k, v = self.query(x), self.key(x), self.value(x)
+        print(x.shape)
+        print(q.shape)
+        print(k.shape)
+        print(v.shape)
 
         # Ignoring the batch dimension, q and k are tensors of shape (d_model, d_k * H)
         # we can think of them as concatenated results
@@ -73,13 +77,13 @@ class MultiHeadAttention(nn.Module):
         # and the rest need to be ignored during a softmax. We do that by setting
         # them to -inf
         q_vertical = torch.cat(
-            [q[..., i : i + H] for i in range(0, K * H, H)], dim=dim_offset
+            [q[..., i : i + K] for i in range(0, K * H, K)], dim=dim_offset
         )
 
         k_horiz = torch.cat(
             [
-                k.transpose(*xpos_dims)[..., i : i + H, :]
-                for i in range(0, K * H, H)
+                k.transpose(*xpos_dims)[..., i : i + K, :]
+                for i in range(0, K * H, K)
             ],
             dim=1 + dim_offset,
         )
@@ -141,7 +145,7 @@ class Encoder(nn.Module):
 
 def main(args):
     d_value = 5
-    atn = MultiHeadAttention(d_key=2, d_value=d_value, num_layers=2, num_heads=2)
+    atn = MultiHeadAttention(d_key=7, d_value=d_value, num_heads=2)
     nn.init.uniform_(atn.query.weight, 0.5, 0.55)
     nn.init.uniform_(atn.key.weight, 0.1, 0.12)
     nn.init.uniform_(atn.value.weight, 0.1, 1.0)
